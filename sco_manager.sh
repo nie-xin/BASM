@@ -1,6 +1,9 @@
 #!/bin/bash 
-# jcz
+# 
+# initialized by darulez
 # TODO :
+#  - support git
+#  - more install options
 
 #set -e
 #set -o pipefail
@@ -8,14 +11,14 @@
 declare -a MYACTIONS
 
 # default if unset
-default_projectname="scolibri"
-default_svnurl="svn://schulcloud.de/scolarium/"
-default_svnpath="trunk"
-default_install_path="."
+default_projectname=""
+default_svnurl=""
+default_svnpath=""
+default_install_path=""
 default_install_env="prod"
 default_deplyment_user="www-data"
 default_install_user=$USER
-
+default_bundles=""
 
 black='\E[30;47m'
 red='\E[31;47m'
@@ -29,10 +32,8 @@ white='\E[37;47m'
 resetcolor='\e[0m'      
 # Text Reset
 
-alias Reset="tput sgr0"
-
 cecho ()                    
-# Color-echo.
+# cecho.
 # Argument $1 = message
 # Argument $2 = color
 {
@@ -43,7 +44,6 @@ cecho ()
 }
 
 confirm () {
-    # call with a prompt string or use a default
     q=$(cecho "${1:-Doing some stuff} \n-> Are you sure? [Y/n]")
     read -r -p "$q" response
     case $response in
@@ -61,13 +61,13 @@ help()
 	echo "Commands : "`basename $0`" OPTIONS"
 	echo "WHERE OPTIONS"
 	echo -e "\t-p <installation_path> : Set an installation path"
-	echo -e "\t-e <environment_name> : set symfony environment"
-	echo -e "\t-c : clear and setup cache"
-	echo -e "\t-a : dump bundles assets resources and generate assets"
-	echo -e "\t-w : generate and watch assets"
-	echo -e "\t-k : check tools and/or install them"
-	echo -e "\t-i : install a version of scolibri"
-	echo -e "\t-b : update composer.phar"
+	echo -e "\t-e <environment_name> : Set symfony environment"
+	echo -e "\t-c : Clear and setup cache"
+	echo -e "\t-a : Dump bundles assets resources and generate assets"
+	echo -e "\t-w : Generate and watch assets"
+	echo -e "\t-k : Check tools and/or install them"
+	echo -e "\t-i : Install a version of the application"
+	echo -e "\t-b : Update composer.phar"
 	echo -e "\t-u : Drop and ReInstall Database"	
 	echo -e "\t-s : Update database"	
 	echo -e "\t-t : Launch test"
@@ -75,6 +75,7 @@ help()
 
 setup_webserver_apache()
 {
+	#tofinish....
 	sudo a2enmod rewrite
 	service apache2 restart
 
@@ -96,9 +97,9 @@ clear_cache ()
 }
 set_working_rights()
 {
-        user=${1:-$depl_user}
-        sudo chown $user.$install_user ${install_path}/app/cache ${install_path}/app/logs
-        sudo chmod 775 ${install_path}/app/cache ${install_path}/app/logs
+	user=${1:-$depl_user}
+	sudo chown $user.$install_user ${install_path}/app/cache ${install_path}/app/logs
+	sudo chmod 775 ${install_path}/app/cache ${install_path}/app/logs
 }
 install_assets()
 {
@@ -113,11 +114,14 @@ install_database()
 {
 
 	cd $install_path
-    sudo -u www-data php app/console doctrine:database:drop --force --env="$install_env"
-	sudo -u www-data  php app/console doctrine:database:create --env="$install_env"
-	sudo -u www-data php app/console doctrine:schema:update --env="$install_env" --force
-	sudo -u www-data php app/console doctrine:fixtures:load --env="$install_env"
-	sudo -u www-data php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/Scolibri/CoreBundle/DataFixtures/$install_typenv
+    php app/console doctrine:database:drop --force --env="$install_env"
+	php app/console doctrine:database:create --env="$install_env"
+	php app/console doctrine:schema:update --env="$install_env" --force
+	php app/console doctrine:fixtures:load --env="$install_env"
+	for bundle in "${application_bundles[@]}"
+    do
+		php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$install_typenv
+    done
 }
 
 update_database()
@@ -127,7 +131,10 @@ update_database()
 	#add intial fixtures
 	php app/console doctrine:fixtures:load --env="$install_env"
 	#add environment specific fixtures
-	php app/console doctrine:fixtures:load --append --env="$install_env"  --fixtures=./src/Scolibri/CoreBundle/DataFixtures/$install_typenv
+	for bundle in "${application_bundles[@]}"
+    do
+		php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$install_typenv
+    done
 }
 
 install_application ()
@@ -194,7 +201,8 @@ setup_conf()
 	application_projectname=${application_projectname:-$default_projectname}
 	application_svnurl=${application_svnurl:-$default_svnurl}
 	application_svnversion=${application_svnversion:-$default_svnversion}
-	
+	application_bundles=${application_bundles:-$default_bundles}
+
 	# Setup install_path
 	if [ ! -z "$MYPATH" ]; then
 		install_path=$MYPATH
@@ -231,16 +239,6 @@ setup_conf()
 	#[ ! -n "$install_path" ] && echo "Cannot find symfony application" && exit 0
 
 }
-
-get_conf()
-{
-	svnurl="svn://schulcloud.de/scolarium/"
-	svnpath="."
-	
-}
-
-# get the conf
-get_conf
 
 # hce:awusitp:k
 
