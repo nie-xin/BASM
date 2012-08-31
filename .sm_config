@@ -21,4 +21,4 @@ application_install_user=$USER
 application_deployment_user="www-data"
 
 # application_bundles : List of bundles of the application
-application_bundles=$( "JMeyo/CoreBundle" )
+application_bundles=( "JMeyo/CoreBundle" )
