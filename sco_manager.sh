@@ -1,6 +1,6 @@
 #!/bin/bash 
 # 
-# initialized by darulez
+# initialized by jcz
 # TODO :
 #  - support git
 #  - more install options
@@ -13,7 +13,7 @@ declare -a MYACTIONS
 # default if unset
 default_projectname=""
 default_svnurl=""
-default_svnpath=""
+default_svnversion=""
 default_install_path=""
 default_install_env="prod"
 default_deplyment_user="www-data"
@@ -60,17 +60,20 @@ help()
 {
 	echo "Commands : "`basename $0`" OPTIONS"
 	echo "WHERE OPTIONS"
-	echo -e "\t-p <installation_path> : Set an installation path"
-	echo -e "\t-e <environment_name> : Set symfony environment"
-	echo -e "\t-c : Clear and setup cache"
-	echo -e "\t-a : Dump bundles assets resources and generate assets"
-	echo -e "\t-w : Generate and watch assets"
-	echo -e "\t-k : Check tools and/or install them"
-	echo -e "\t-i : Install a version of the application"
+	echo -e "\t-a : Dump bundles assets resources and generate assets"	
 	echo -e "\t-b : Update composer.phar"
-	echo -e "\t-u : Drop and ReInstall Database"	
-	echo -e "\t-s : Update database"	
-	echo -e "\t-t : Launch test"
+	echo -e "\t-c : Clear and setup cache"
+	echo -e "\t-e <environment_name> : Set symfony environment"
+	echo -e "\t-f <sm_config_file> : Load config from a spcific file"
+	echo -e "\t-i : Install a version of the application"
+	echo -e "\t-k : Check tools and/or install them"
+	echo -e "\t-p <installation_path> : Set an installation path"
+	echo -e "\t-s : Drop and ReInstall Database"	
+	echo -e "\t-t : Launch tests"
+	echo -e "\t-u : Update a version of the application"	
+	echo -e "\t-v <svn_version> : Set svn tag/version"	
+	echo -e "\t-w : Generate and watch assets"
+	echo -e "\t-y : Update database"
 }
 
 setup_webserver_apache()
@@ -113,7 +116,6 @@ install_assets()
 install_database()
 {
 
-	cd $install_path
     php app/console doctrine:database:drop --force --env="$install_env"
 	php app/console doctrine:database:create --env="$install_env"
 	php app/console doctrine:schema:update --env="$install_env" --force
@@ -126,7 +128,6 @@ install_database()
 
 update_database()
 {
-	cd $install_path
 	php app/console doctrine:schema:update --env="$install_env" --force
 	#add intial fixtures
 	php app/console doctrine:fixtures:load --env="$install_env"
@@ -140,8 +141,6 @@ update_database()
 install_application ()
 {
 	if  $(confirm "Install $application_projectname into $install_path") ; then
-		mkdir -p $install_path && cd $install_path
-		# do dangerous stuff		
 		check_needed_tools
 		cecho "Checkout code"
 		svn co $application_svnurl/$application_svnversion .
@@ -151,7 +150,19 @@ install_application ()
 		install_assets
 		clear_cache
 	fi
-
+}
+update_application ()
+{
+	if  $(confirm "Update $application_projectname into $install_path") ; then
+		check_needed_tools
+		cecho "Checkout code"
+		svn co $application_svnurl/$application_svnversion .
+		cecho "Installing symfony dependencies through composer"
+		php /usr/local/bin/composer.phar install
+		install_database
+		install_assets
+		clear_cache
+	fi
 }
 update_composer()
 {
@@ -193,16 +204,21 @@ setup_conf()
 {
 	if [ ! -z "$MYCONF" ]; then
 		[ -f $MYCONF ] && cecho "Loading configuration from $MYCONF" $blue && source $MYCONF
-		[ -f $PWD/$MYCONF ] && cecho "Loading configuration from $PWD/$MYCONF" $blue && source $PWD/$MYCONF
 	else 
 		[ -f $PWD/.sm_config ] && cecho "Loading configuration from $PWD/.sm_config" $blue && source $PWD/.sm_config
 	fi
 	
 	application_projectname=${application_projectname:-$default_projectname}
 	application_svnurl=${application_svnurl:-$default_svnurl}
-	application_svnversion=${application_svnversion:-$default_svnversion}
 	application_bundles=${application_bundles:-$default_bundles}
 
+	# Setup install_path
+	if [ ! -z "$MYVERSION" ]; then
+		application_svnversion=$MYVERSION
+	else 
+		application_svnversion=${application_svnversion:-$default_svnversion}
+	fi
+	
 	# Setup install_path
 	if [ ! -z "$MYPATH" ]; then
 		install_path=$MYPATH
@@ -221,8 +237,10 @@ setup_conf()
 	[ "${install_env:0:3}" == "dev" ] && install_typenv="tes" || install_typenv=${install_env:0:3}
 
 	cecho "Working on project $application_projectname" $blue
-	cecho "\t - environment : $install_env" $blue 
-	cecho "\t - install path : $install_path" $blue 
+	cecho "\t - Environment : $install_env" $blue 
+	cecho "\t - Install path : $install_path" $blue 
+	cecho "\t - Application version : $application_svnversion" $blue 
+	
 
 	if [ ! -d "$install_path" ]; then
 		if $(confirm "Work on $application_projectname (path: $install_path )") ; then
@@ -241,8 +259,7 @@ setup_conf()
 }
 
 # hce:awusitp:k
-
-while getopts ":hf:ce:abwusitdp:k:" optname
+while getopts ":abcde:f:hikp:r:stuv:wy:" optname
   do
     case "$optname" in
       "f")
@@ -257,6 +274,12 @@ while getopts ":hf:ce:abwusitdp:k:" optname
       "p")
         MYPATH=${OPTARG}
         ;;
+      "r")
+        MYREVISION=${OPTARG}
+        ;;
+      "v")
+        MYVERSION=${OPTARG}
+        ;;
       "h")
         help
         exit 0
@@ -268,10 +291,13 @@ while getopts ":hf:ce:abwusitdp:k:" optname
         MYACTIONS=("${MYACTIONS[@]}" "install_application")
         ;;
       "u")
+        MYACTIONS=("${MYACTIONS[@]}" "update_application")
+       ;;
+	  "y")
         MYACTIONS=("${MYACTIONS[@]}" "update_database")
        ;;
       "s")
-        MYACTIONS="install_database"
+        MYACTIONS=("${MYACTIONS[@]}" "install_database")
         ;;        
       "a")
         MYACTIONS=("${MYACTIONS[@]}" "install_assets")
