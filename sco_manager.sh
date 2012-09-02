@@ -203,9 +203,11 @@ watch_assets()
 setup_conf()
 {
 	if [ ! -z "$MYCONF" ]; then
-		[ -f $MYCONF ] && cecho "Loading configuration from $MYCONF" $blue && source $MYCONF
+		[ -f $MYCONF ] && cecho "Loading specific configuration from $MYCONF" $blue && source $MYCONF
+		[ ! -f $MYCONF ] && cecho "Can't find configuration ile : $MYCONF in $PWD" $red && exit 0
 	else 
-		[ -f $PWD/.sm_config ] && cecho "Loading configuration from $PWD/.sm_config" $blue && source $PWD/.sm_config
+		[ -f $PWD/.sm_config -a ! -f ~/.sm_config ] && cecho "Loading configuration from $PWD/.sm_config" $blue && source $PWD/.sm_config
+		[ -f ~/.sm_config ] && cecho "Loading personal default configuration from ~/.sm_config" $blue && source ~/.sm_config
 	fi
 	
 	application_projectname=${application_projectname:-$default_projectname}
