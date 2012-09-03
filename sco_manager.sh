@@ -1,6 +1,6 @@
 #!/bin/bash 
 # 
-# initialized by jcz
+# Initialized by Jean-Christophe Meillaud
 # TODO :
 #  - support git
 #  - more install options
@@ -61,7 +61,7 @@ help()
 	echo "Commands : "`basename $0`" OPTIONS"
 	echo "WHERE OPTIONS"
 	echo -e "\t-a : Dump bundles assets resources and generate assets"	
-	echo -e "\t-b : Update composer.phar"
+	echo -e "\t-b : Update composer dependencies"
 	echo -e "\t-c : Clear and setup cache"
 	echo -e "\t-e <environment_name> : Set symfony environment"
 	echo -e "\t-f <sm_config_file> : Load config from a spcific file"
