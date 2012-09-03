@@ -31,7 +31,7 @@ Integrate with Composer
 =======================
 
 1)Define a repository, as BASM is not yet in Packagist
-,
+```
     "repositories": [
     {
         "type": "package",
@@ -50,7 +50,7 @@ Integrate with Composer
         }
     }
     ],
-    
+```  
 
 2) Add the following line to your Symfony2 composer.json file:
 
