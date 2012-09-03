@@ -101,8 +101,8 @@ clear_cache ()
 set_working_rights()
 {
 	user=${1:-$depl_user}
-	sudo chown $user.$install_user ${install_path}/app/cache ${install_path}/app/logs
-	sudo chmod 775 ${install_path}/app/cache ${install_path}/app/logs
+	sudo chown -R $user.$install_user ${install_path}/app/cache ${install_path}/app/logs
+	sudo chmod -R 775 ${install_path}/app/cache ${install_path}/app/logs
 }
 install_assets()
 {
