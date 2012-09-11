@@ -125,7 +125,10 @@ install_database()
 		php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$install_typenv
     done
 }
-
+check_needed_apps()
+{
+	command -v less >/dev/null 2>&1 || { sudo apt-get install npm;npm install less -g }
+}
 update_database()
 {
 	php app/console doctrine:schema:update --env="$install_env" --force
@@ -140,8 +143,10 @@ update_database()
 
 install_application ()
 {
+	
 	if  $(confirm "Install $application_projectname into $install_path") ; then
 		check_needed_tools
+		check_needed_apps
 		cecho "Checkout code"
 		svn co $application_svnurl/$application_svnversion .
 		cecho "Installing symfony dependencies through composer"
@@ -156,7 +161,7 @@ update_application ()
 	if  $(confirm "Update $application_projectname into $install_path") ; then
 		check_needed_tools
 		cecho "Checkout code"
-		svn co $application_svnurl/$application_svnversion .
+		svn up $application_svnurl/$application_svnversion .
 		cecho "Installing symfony dependencies through composer"
 		php /usr/local/bin/composer.phar install
 		install_database
