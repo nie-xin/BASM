@@ -127,7 +127,7 @@ install_database()
 }
 check_needed_apps()
 {
-	command -v less >/dev/null 2>&1 || { sudo apt-get install npm;npm install less -g }
+	command -v less >/dev/null 2>&1 || { sudo apt-get install npm;npm install less -g; }
 }
 update_database()
 {
