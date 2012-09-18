@@ -127,7 +127,8 @@ install_database()
 }
 check_needed_apps()
 {
-	command -v less >/dev/null 2>&1 || { sudo apt-get install npm;npm install less -g; }
+	sudo apt-get update
+	command -v less >/dev/null 2>&1 || { sudo apt-get install npm;sudo npm install less -g; }
 }
 update_database()
 {
@@ -163,7 +164,7 @@ update_application ()
 		cecho "Checkout code"
 		svn up $application_svnurl/$application_svnversion .
 		cecho "Installing symfony dependencies through composer"
-		php /usr/local/bin/composer.phar install
+		php /usr/local/bin/composer.phar update
 		install_database
 		install_assets
 		clear_cache
