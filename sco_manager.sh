@@ -267,7 +267,7 @@ setup_conf()
 }
 
 # hce:awusitp:k
-while getopts ":abcde:f:hikp:r:stuv:wy:" optname
+while getopts ":abcde:f:hikp:r:stuv:wy" optname
   do
     case "$optname" in
       "f")
