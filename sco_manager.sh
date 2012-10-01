@@ -119,6 +119,9 @@ install_database()
     php app/console doctrine:database:drop --force --env="$install_env"
 	php app/console doctrine:database:create --env="$install_env"
 	php app/console doctrine:schema:update --env="$install_env" --force
+	if  $(confirm "Do you want to generate acl tables") ; then
+		php app/console init:acl --env="$install_env"
+	fi
 	php app/console doctrine:fixtures:load --env="$install_env"
 	for bundle in "${application_bundles[@]}"
     do
@@ -129,6 +132,9 @@ install_database()
 update_database()
 {
 	php app/console doctrine:schema:update --env="$install_env" --force
+	if  $(confirm "Do you want to generate acl tables") ; then
+		php app/console init:acl --env="$install_env"
+	fi
 	#add intial fixtures
 	php app/console doctrine:fixtures:load --env="$install_env"
 	#add environment specific fixtures
@@ -197,6 +203,7 @@ install_composer()
 
 watch_assets()
 {
+	set_working_rights $depl_user
 	php ${install_path}/app/console assetic:dump --env=$install_env --watch
 }
 
@@ -206,8 +213,8 @@ setup_conf()
 		[ -f $MYCONF ] && cecho "Loading specific configuration from $MYCONF" $blue && source $MYCONF
 		[ ! -f $MYCONF ] && cecho "Can't find configuration ile : $MYCONF in $PWD" $red && exit 0
 	else 
-		[ -f $PWD/.sm_config -a ! -f ~/.sm_config ] && cecho "Loading configuration from $PWD/.sm_config" $blue && source $PWD/.sm_config
-		[ -f ~/.sm_config ] && cecho "Loading personal default configuration from ~/.sm_config" $blue && source ~/.sm_config
+		[ -f $PWD/.sm_config ] && cecho "Loading local configuration from $PWD/.sm_config" $blue && source $PWD/.sm_config
+		[ -f ~/.sm_config -a ! -f $PWD/.sm_config ] && cecho "Loading personal default configuration from ~/.sm_config" $blue && source ~/.sm_config
 	fi
 	
 	application_projectname=${application_projectname:-$default_projectname}
