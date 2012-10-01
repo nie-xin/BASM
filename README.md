@@ -23,7 +23,9 @@ About configuration
 
 Its possible to load a configuration from several places. 
 
-Either through the -f option, to link with a specific file, or if you just want to work on a specific project, just put a ".sm_config" file in your root directory. A sample ".sm_config" can be found in the default BASM directory
+Either through the -f option, to link with a specific file, or if you just want to work on a specific project, just put a ".sm_config" file in your home directory. A sample ".sm_config" can be found in the default BASM directory
+
+First BASM check for the presence of a configuration file passed as a parameter, then it uses the .sm_config file in the home directory, then it looks in the current directory. If nothing is fine, then it just use default values, which should not feed your needs ;)
 
 Check `.sm_config` Sample for more information
 
