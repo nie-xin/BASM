@@ -168,7 +168,7 @@ update_application ()
 	if  $(confirm "Update $application_projectname into $install_path") ; then
 		check_needed_tools
 		cecho "Checkout code"
-		svn up $application_svnurl/$application_svnversion .
+		svn up
 		cecho "Installing symfony dependencies through composer"
 		php /usr/local/bin/composer.phar update
 		install_database
