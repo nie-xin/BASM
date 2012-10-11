@@ -44,6 +44,7 @@ cecho ()
 }
 
 confirm () {
+	if $FORCE; then true;return;fi;
     q=$(cecho "${1:-Doing some stuff} \n-> Are you sure? [Y/n]")
     read -r -p "$q" response
     case $response in
@@ -64,9 +65,10 @@ help()
 	echo -e "\t-b : Update composer dependencies"
 	echo -e "\t-c : Clear and setup cache"
 	echo -e "\t-e <environment_name> : Set symfony environment"
-	echo -e "\t-f <sm_config_file> : Load config from a spcific file"
+	echo -e "\t-f : Do not ask question mo'fo'"	
 	echo -e "\t-i : Install a version of the application"
 	echo -e "\t-k : Check tools and/or install them"
+	echo -e "\t-l <sm_config_file> : Load config from a spcific file"	
 	echo -e "\t-p <installation_path> : Set an installation path"
 	echo -e "\t-s : Drop and ReInstall Database"	
 	echo -e "\t-t : Launch tests"
@@ -113,34 +115,36 @@ install_assets()
 	cecho "Assets installed"
 }
 
-install_database()
-{
 
-    php app/console doctrine:database:drop --force --env="$install_env"
-	php app/console doctrine:database:create --env="$install_env"
-	php app/console doctrine:schema:update --env="$install_env" --force
-	if  $(confirm "Do you want to generate acl tables") ; then
-		php app/console init:acl --env="$install_env"
-	fi
-	php app/console doctrine:fixtures:load --env="$install_env"
-	for bundle in "${application_bundles[@]}"
-    do
-		php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$install_typenv
-    done
-}
 check_needed_apps()
 {
 	sudo apt-get update
 	command -v less >/dev/null 2>&1 || { sudo apt-get install npm;sudo npm install less -g; }
 }
+
+install_database()
+{
+	manage_database "install"
+}
+
 update_database()
 {
+	manage_database "update"
+}
+
+manage_database() 
+{ 
+	if [ $1 == "install" ]; then
+		php app/console doctrine:database:drop --force --env="$install_env"
+		php app/console doctrine:database:create --env="$install_env"	
+	fi
 	php app/console doctrine:schema:update --env="$install_env" --force
 	if  $(confirm "Do you want to generate acl tables") ; then
 		php app/console init:acl --env="$install_env"
 	fi
 	#add intial fixtures
-	php app/console doctrine:fixtures:load --env="$install_env"
+	${FORCE} && opt="-n"
+	php app/console doctrine:fixtures:load --env="$install_env" $opt
 	#add environment specific fixtures
 	for bundle in "${application_bundles[@]}"
     do
@@ -223,6 +227,8 @@ setup_conf()
 		[ -f ~/.sm_config -a ! -f $PWD/.sm_config ] && cecho "Loading personal default configuration from ~/.sm_config" $blue && source ~/.sm_config
 	fi
 	
+	FORCE=${FORCE:-false}
+	
 	application_projectname=${application_projectname:-$default_projectname}
 	application_svnurl=${application_svnurl:-$default_svnurl}
 	application_bundles=${application_bundles:-$default_bundles}
@@ -258,7 +264,7 @@ setup_conf()
 	
 
 	if [ ! -d "$install_path" ]; then
-		if $(confirm "Work on $application_projectname (path: $install_path )") ; then
+		if $(confirm "Work on $application_projectname (path: $install_path )"); then
 		#if [ confirm "Working with $application_projectname into $install_path\n" ]; then
 			mkdir -p $install_path
 		else
@@ -274,10 +280,13 @@ setup_conf()
 }
 
 # hce:awusitp:k
-while getopts ":abcde:f:hikp:r:stuv:wy" optname
+while getopts ":abcde:fhikl:p:r:stuv:wy" optname
   do
     case "$optname" in
       "f")
+        FORCE=true
+        ;;  
+      "l")
         MYCONF=${OPTARG}
         ;;    
       "d")
