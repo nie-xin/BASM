@@ -356,7 +356,7 @@ while getopts ":abcde:fhikl:p:r:stuv:wy" optname
 
 if [ ! -z $MYACTIONS ]; then
     setup_conf
-    cecho "\nYou are about to do those actions : ${MYACTIONS[*]}\n" $red
+    cecho "You are about to do those actions : ${MYACTIONS[*]}\n" $red
     set_working_rights $install_user
     for action in "${MYACTIONS[@]}"
     do
