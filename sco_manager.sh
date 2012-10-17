@@ -76,6 +76,7 @@ help()
 	echo -e "\t-v <svn_version> : Set svn tag/version"	
 	echo -e "\t-w : Generate and watch assets"
 	echo -e "\t-y : Update database"
+	#echo -e "\t-z : Update Sco Manager"
 }
 
 setup_webserver_apache()
@@ -103,8 +104,10 @@ clear_cache ()
 set_working_rights()
 {
 	user=${1:-$depl_user}
-	sudo chown -R $user.$install_user ${install_path}/app/cache ${install_path}/app/logs
-	sudo chmod -R 775 ${install_path}/app/cache ${install_path}/app/logs
+	if [ -d "${install_path}/app/cache" -a -d "${install_path}/app/logs" ]; then
+		sudo chown -R $user.$install_user ${install_path}/app/cache ${install_path}/app/logs
+		sudo chmod -R 775 ${install_path}/app/cache ${install_path}/app/logs
+	fi
 }
 install_assets()
 {
@@ -118,8 +121,7 @@ install_assets()
 
 check_needed_apps()
 {
-	sudo apt-get update
-	command -v less >/dev/null 2>&1 || { sudo apt-get install npm;sudo npm install less -g; }
+	command -v less >/dev/null 2>&1 || { sudo apt-get update;sudo apt-get install npm;sudo npm install less -g; }
 }
 
 install_database()
