@@ -15,6 +15,7 @@ For simple use add it to your path, or better, add a alias (in .bash_aliases for
     alias sm="<path_to_your_project>/vendor/jmeyo/BASM/sco_manager.sh"
 
 Then use it like :
+
     sm -h // show help
     sm -ac // copy assets, and clear cache
     
@@ -28,6 +29,16 @@ Either through the -f option, to link with a specific file, or if you just want 
 First BASM check for the presence of a configuration file passed as a parameter, then it uses the .sm_config file in the home directory, then it looks in the current directory. If nothing is fine, then it just use default values, which should not feed your needs ;)
 
 Check `.sm_config` Sample for more information
+
+Best Practice
+=============
+
+This simple manager gives you the ability to never lose anymore time with annoying symony commands, as it takes care of rights ;)
+A good way of using it for several projects might be to define several alias, with different config file :
+
+    alias sma="<path_to_your_project>/vendor/jmeyo/BASM/sco_manager.sh -f ~/project_alpha/.smconfig"
+    alias smb="<path_to_your_project>/vendor/jmeyo/BASM/sco_manager.sh -f ~/project_basta/.smconfig"
+
 
 Integrate with Composer
 =======================
