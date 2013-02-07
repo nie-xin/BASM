@@ -12,8 +12,9 @@ declare -a MYACTIONS
 
 # default if unset
 default_projectname=""
-default_svnurl=""
-default_svnversion=""
+default_scmtool="git"
+default_scmurl=""
+default_scmversion=""
 default_install_path=""
 default_install_env="prod"
 default_deplyment_user="www-data"
@@ -154,16 +155,50 @@ manage_database()
     done
 }
 
+getcode ()
+{
+	action=$1
+	case $action in
+		"create")
+            case $application_scmtool in
+				"git")
+					cecho "Cloning git repository"
+					git clone $application_scmurl $application_scmversion .
+				;; 
+				"svn")
+					cecho "Checkout svn repository"
+					svn co $application_scmurl/$application_scmversion .
+				;;
+				esac
+            ;;
+		"update")
+			case $application_scmtool in
+				"git")
+					cecho "Cloning git repository"
+					git pull
+				;; 
+				"svn")
+					cecho "Updating from svn repository"
+					svn co
+				;;
+				esac
+            ;;            
+        *)
+			cecho 
+            exit 0;
+            ;;
+    esac
+}
+
 install_application ()
 {
 	
 	if  $(confirm "Install $application_projectname into $install_path") ; then
 		check_needed_tools
 		check_needed_apps
-		cecho "Checkout code"
-		svn co $application_svnurl/$application_svnversion .
-		cecho "Installing symfony dependencies through composer"
-		php /usr/local/bin/composer.phar install
+		
+		getcode "create"
+		manage_composer "update"
 		install_database
 		install_assets
 		clear_cache
@@ -175,16 +210,17 @@ update_application ()
 		check_needed_tools
 		cecho "Checkout code"
 		svn up
-		cecho "Installing symfony dependencies through composer"
-		php /usr/local/bin/composer.phar update
+		manage_composer "update"
 		install_database
 		install_assets
 		clear_cache
 	fi
 }
-update_composer()
+manage_composer()
 {
-	php /usr/local/bin/composer.phar update
+	action=${1:-"update"}
+	cecho $action"ing symfony dependencies through composer"
+	php /usr/local/bin/composer.phar "$action"
 }
 install_phpunit()
 {
@@ -232,14 +268,18 @@ setup_conf()
 	FORCE=${FORCE:-false}
 	
 	application_projectname=${application_projectname:-$default_projectname}
-	application_svnurl=${application_svnurl:-$default_svnurl}
+	application_scmurl=${application_scmurl:-$default_scmurl}
+	application_scmtool=${application_scmtool:-$default_scmtool}
+	[ "$application_scmtool" == "git" -o "$application_scmtool" == "svn" ] || (cecho "SCM tool not supported : $application_scmtool" $red && exit 0)
+	
+
 	application_bundles=${application_bundles:-$default_bundles}
 
 	# Setup install_path
 	if [ ! -z "$MYVERSION" ]; then
-		application_svnversion=$MYVERSION
+		application_scmversion=$MYVERSION
 	else 
-		application_svnversion=${application_svnversion:-$default_svnversion}
+		application_scmversion=${application_scmversion:-$default_scmversion}
 	fi
 	
 	# Setup install_path
@@ -262,7 +302,7 @@ setup_conf()
 	cecho "Working on project $application_projectname" $blue
 	cecho "\t - Environment : $install_env" $blue 
 	cecho "\t - Install path : $install_path" $blue 
-	cecho "\t - Application version : $application_svnversion" $blue 
+	cecho "\t - Application version : $application_scmversion" $blue 
 	
 
 	if [ ! -d "$install_path" ]; then
@@ -338,7 +378,7 @@ while getopts ":abcde:fhikl:p:r:stuv:wy" optname
         MYACTIONS=("${MYACTIONS[@]}" "launch_test")
         ;;
       "b")
-        MYACTIONS=("${MYACTIONS[@]}" "update_composer")
+        MYACTIONS=("${MYACTIONS[@]}" "manage_composer")
         ;;                       
       "?")
         cecho "Unknown option $OPTARG" $red
