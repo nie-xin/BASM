@@ -33,6 +33,13 @@ white='\E[37;47m'
 resetcolor='\e[0m'      
 # Text Reset
 
+trap ctrl_c INT
+
+function ctrl_c() {
+	echo
+	cecho "Halting  "`basename $0` $red
+	exit 0;
+}
 cecho ()                    
 # cecho.
 # Argument $1 = message
@@ -54,6 +61,7 @@ confirm () {
             ;;
         *)
             false
+            exit 0
             ;;
     esac
 }
