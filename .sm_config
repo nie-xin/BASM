@@ -8,11 +8,14 @@ application_install_env="dev"
 # application_projectname : Project name for verbose info mainly
 application_projectname="hypopo"
 
-# application_svnurl : Main svn url
-application_svnurl="svn://to_be_defined"
+# application_scmtool : name of the scm tool used, currently git and svn supported 
+application_scmtool="git"
 
-#application_svnversion : svn version, might be a tag, or a branch too.
-application_svnversion="trunk"
+# application_scmurl : Main scm url
+application_scmurl="svn://to_be_defined"
+
+#application_scmversion : scm version, might be a tag, or a branch too, or a version.
+application_scmversion="master"
 
 # application_install_user : user used for the installation process
 application_install_user=$USER
