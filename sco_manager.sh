@@ -159,8 +159,13 @@ manage_database()
 	#add environment specific fixtures
 	for bundle in "${application_bundles[@]}"
     do
-		php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$install_typenv
-    done
+		if [ ! -z `ls ./src/$bundle/DataFixtures/$install_typenv 2>/dev/null` ]; then
+			php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$install_typenv
+		else
+			cecho "No fixtures in ./src/$bundle/DataFixtures/$install_typenv" $blue
+		fi
+    done	
+
 }
 
 getcode ()
