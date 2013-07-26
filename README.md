@@ -5,6 +5,12 @@ Bash Advanced Symfony Manager
 
 Simple tool to manage your Symfony Project
 
+Install
+=======
+Mainly clone the github repository in your desired directory
+
+    mkdir -p ~/work/tools/BASM
+    git clone https://github.com/jmeyo/BASM ~/work/tools/BASM
 
 Usage
 =====
@@ -12,15 +18,34 @@ Launch it like a simple script.
 
 For simple use add it to your path, or better, add a alias (in ~/.bash_aliases for example)
 
-    alias sm="<path_to_your_project>/vendor/jmeyo/BASM/sco_manager.sh"
+    alias sm="~/work/tools/BASM/sco_manager.sh"
 
 Then use it like :
 
-    sm -h // show help
+	$ sm -h // show help
+	Commands : sco_manager.sh OPTIONS
+	WHERE OPTIONS
+		-a : Dump bundles assets resources and generate assets
+		-b : Update composer dependencies
+		-c : Clear and setup cache
+		-e <environment_name> : Set symfony environment
+		-f : Do not ask question mo'fo'
+		-i : Install a version of the application
+		-k : Check tools and/or install them
+		-l <sm_config_file> : Load config from a spcific file
+		-p <installation_path> : Set an installation path
+		-s : Drop and ReInstall Database
+		-t : Launch tests
+		-u : Update a version of the application
+		-v <svn_version> : Set svn tag/version
+		-w : Generate and watch assets
+		-y : Update database
+		-z : Update Sco Manager
+	You can mix those option together
+
     
     
-    
-    sm -ac // copy assets, and clear cache
+	$ sm -ac // copy assets, and clear cache
     
 About configuration
 ===================
