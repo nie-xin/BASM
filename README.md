@@ -27,7 +27,7 @@ About configuration
 
 Its possible to load a configuration from several places. 
 
-Either through the -f option, to link with a specific file, or if you just want to work on a specific project, just put a ".sm_config" file in your home directory. A sample ".sm_config" can be found in the default BASM directory
+Either through the -f option, to link with a specific file, or if you just want to work on a specific project, just put a "sm-config-<project_name>" file in your home directory (you can prefix it with a dot to hide it). A sample "sm-config-default" can be found in the default BASM directory
 
 First BASM check for the presence of a configuration file passed as a parameter, then it uses the .sm_config file in the home directory, then it looks in the current directory. If nothing is fine, then it just use default values, which should not feed your needs ;)
 
@@ -43,12 +43,12 @@ With bash, you could add something like that in the ~/.bash_aliases file to pars
 
 	# sm conf alias loader
 	sco_manager_path=/home/user/work/projects/mygithub/BASM/sco_manager.sh
-	sco_manager_conf_directory=/home/user/work/config-tools/sm-config
+	sco_manager_conf_directory=/home/user/work/config-tools/sm-config-default
 	# default shortcut for the calling symfony manager without any conf files
 	alias sm_='$sco_manager_path'
 	for conffile in `ls $sco_manager_conf_directory`; do
 		project_name=${conffile/sm-config-}
-		alias sm_$project_name='$sco_manager_path -l $sco_manager_conf_directory/$conffile'
+		alias sm_$project_name="$sco_manager_path -l $sco_manager_conf_directory/$conffile"
 	done
 	
 I tend to prefix my configuraiton files with sm-config-<project_name>, but this is not mandatory, and the alias shortcut will be sm_<project_name> <OPTIONS>
