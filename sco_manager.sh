@@ -1,6 +1,6 @@
 #!/bin/bash 
 # 
-# Initialized by Jean-Christophe Meillaud
+# Initialized by Jean-Christophe Meillaud (www.github.com/jmeyo)
 # TODO :
 #  - support git
 #  - more install options
@@ -17,7 +17,7 @@ default_scmurl=""
 default_scmversion=""
 default_install_path=""
 default_install_env="prod"
-default_deplyment_user="www-data"
+default_deployment_user="www-data"
 default_install_user=$USER
 default_bundles=""
 
@@ -187,12 +187,12 @@ getcode ()
 		"update")
 			case $application_scmtool in
 				"git")
-					cecho "Cloning git repository"
-					git pull
+					cecho "Updating git repository from $application_scmversion branch"
+					git pull origin master
 				;; 
 				"svn")
 					cecho "Updating from svn repository"
-					svn co
+					svn up
 				;;
 				esac
             ;;            
@@ -222,7 +222,7 @@ update_application ()
 	if  $(confirm "Update $application_projectname into $install_path") ; then
 		check_needed_tools
 		cecho "Checkout code"
-		svn up
+		getcode "update"
 		manage_composer "update"
 		install_database
 		install_assets
@@ -315,8 +315,10 @@ setup_conf()
 	cecho "Working on project $application_projectname" $blue
 	cecho "\t - Environment : $install_env" $blue 
 	cecho "\t - Install path : $install_path" $blue 
-	cecho "\t - Application version : $application_scmversion" $blue 
-	
+	cecho "\t - SCM Url : $application_scmurl" $blue
+	cecho "\t - SCM Type : $application_scmtool" $blue 
+	cecho "\t - SCM Application version : $application_scmversion" $blue 
+
 
 	if [ ! -d "$install_path" ]; then
 		if $(confirm "Work on $application_projectname (path: $install_path )"); then
