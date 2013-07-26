@@ -31,7 +31,7 @@ Either through the -f option, to link with a specific file, or if you just want 
 
 First BASM check for the presence of a configuration file passed as a parameter, then it uses the .sm_config file in the home directory, then it looks in the current directory. If nothing is fine, then it just use default values, which should not feed your needs ;)
 
-Check `.sm_config` Sample for more information
+Check [sm-config-default](https://github.com/jmeyo/BASM/blob/master/sm-config-default) example file
 
 Best Practice
 =============
