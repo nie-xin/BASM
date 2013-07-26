@@ -10,13 +10,16 @@ Usage
 =====
 Launch it like a simple script.
 
-For simple use add it to your path, or better, add a alias (in .bash_aliases for example)
+For simple use add it to your path, or better, add a alias (in ~/.bash_aliases for example)
 
     alias sm="<path_to_your_project>/vendor/jmeyo/BASM/sco_manager.sh"
 
 Then use it like :
 
     sm -h // show help
+    
+    
+    
     sm -ac // copy assets, and clear cache
     
 About configuration
@@ -34,10 +37,21 @@ Best Practice
 =============
 
 This simple manager gives you the ability to never lose anymore time with annoying symony commands, as it takes care of rights ;)
-A good way of using it for several projects might be to define several alias, with different config file :
+A good way of using it for several projects might be to define several alias, with different config file and store them in a common directory (for example /home/user/work/config-tools/sm-config). 
 
-    alias sma="<path_to_your_project>/vendor/jmeyo/BASM/sco_manager.sh -f ~/project_alpha/.smconfig"
-    alias smb="<path_to_your_project>/vendor/jmeyo/BASM/sco_manager.sh -f ~/project_basta/.smconfig"
+With bash, you could add something like that in the ~/.bash_aliases file to parse that directory and add alias for your projects automatically
+
+	# sm conf alias loader
+	sco_manager_path=/home/user/work/projects/mygithub/BASM/sco_manager.sh
+	sco_manager_conf_directory=/home/user/work/config-tools/sm-config
+	# default shortcut for the calling symfony manager without any conf files
+	alias sm_='$sco_manager_path'
+	for conffile in `ls $sco_manager_conf_directory`; do
+		project_name=${conffile/sm-config-}
+		alias sm_$project_name='$sco_manager_path -l $sco_manager_conf_directory/$conffile'
+	done
+	
+I tend to prefix my configuraiton files with sm-config-<project_name>, but this is not mandatory, and the alias shortcut will be sm_<project_name> <OPTIONS>
 
 
 Integrate with Composer

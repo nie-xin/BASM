@@ -33,6 +33,8 @@ white='\E[37;47m'
 resetcolor='\e[0m'      
 # Text Reset
 
+sm_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 trap ctrl_c INT
 
 function ctrl_c() {
@@ -85,7 +87,8 @@ help()
 	echo -e "\t-v <svn_version> : Set svn tag/version"	
 	echo -e "\t-w : Generate and watch assets"
 	echo -e "\t-y : Update database"
-	#echo -e "\t-z : Update Sco Manager"
+	echo -e "\t-z : Update Sco Manager"
+	echo -e "You can mix those option together"
 }
 
 setup_webserver_apache()
@@ -337,7 +340,7 @@ setup_conf()
 }
 
 # hce:awusitp:k
-while getopts ":abcde:fhikl:p:r:stuv:wy" optname
+while getopts ":abcde:fhikl:p:r:stuv:wyz" optname
   do
     case "$optname" in
       "f")
@@ -401,6 +404,14 @@ while getopts ":abcde:fhikl:p:r:stuv:wy" optname
       ":")
         cecho "No argument value for option $OPTARG" $red
         ;;
+      "z")
+		  (
+			cecho "Pull latest version of `basename $0` from master repository" $red
+			cd $sm_dir
+			git pull
+		  ) 
+		  exit 0;
+        ;;         
       *)
         cecho -e "\n\t-> $OPTARG Bad options\n\n" $red
         help
