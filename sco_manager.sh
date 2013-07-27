@@ -6,7 +6,19 @@
 #  - more install options
 
 #set -e
-#set -o pipefail
+
+set -o pipefail  # trace ERR through pipes
+set -o errtrace  # trace ERR through 'time command' and other functions
+
+function error() {
+    JOB="$0"              # job name
+    LASTLINE="$1"         # line of error occurrence
+    LASTERR="$2"          # error code
+    #echo "ERROR in ${JOB} : line ${LASTLINE} with exit code ${LASTERR}"
+    cecho "Stopping  "`basename $0` $red
+    exit 1
+}
+trap 'error ${LINENO} ${?}' ERR
 
 declare -a MYACTIONS
 
@@ -148,14 +160,19 @@ update_database()
 
 manage_database() 
 { 
+
 	if [ $1 == "install" ]; then
 		php app/console doctrine:database:drop --force --env="$install_env"
 		php app/console doctrine:database:create --env="$install_env"	
 	fi
+	
 	php app/console doctrine:schema:update --env="$install_env" --force
 	if  $(confirm "Do you want to generate acl tables") ; then
-		php app/console init:acl --env="$install_env"
+		# hack to ignore error for already existing acl tables
+		php app/console init:acl --env="$install_env" || true
+		
 	fi
+	
 	#add intial fixtures
 	${FORCE} && opt="-n"
 	php app/console doctrine:fixtures:load --env="$install_env" $opt
@@ -167,8 +184,7 @@ manage_database()
 		else
 			cecho "No fixtures in ./src/$bundle/DataFixtures/$install_typenv" $blue
 		fi
-    done	
-
+    done
 }
 
 getcode ()
@@ -212,7 +228,6 @@ install_application ()
 	if  $(confirm "Install $application_projectname into $install_path") ; then
 		check_needed_tools
 		check_needed_apps
-		
 		getcode "create"
 		manage_composer "update"
 		install_database
@@ -367,7 +382,7 @@ while getopts ":abcde:fhikl:p:r:stuv:wyz" optname
       "h")
         help
         exit 0
-        ;;
+        ;;    
       "c")
         MYACTIONS=("${MYACTIONS[@]}" "clear_cache")
         ;;
