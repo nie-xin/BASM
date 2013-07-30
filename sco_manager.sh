@@ -162,7 +162,8 @@ manage_database()
 { 
 
 	if [ $1 == "install" ]; then
-		php app/console doctrine:database:drop --force --env="$install_env"
+		# hack to ignore error for already existing acl tables
+		php app/console doctrine:database:drop --force --env="$install_env" || true
 		php app/console doctrine:database:create --env="$install_env"	
 	fi
 	
