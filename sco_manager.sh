@@ -95,7 +95,11 @@ help()
 	echo -e "\t-p <installation_path> : Set an installation path"
 	echo -e "\t-s : Drop and ReInstall Database"	
 	echo -e "\t-t : Launch tests"
-	echo -e "\t-u : Update a version of the application"	
+	echo -e "\t-u <install|update|none>: Update a version of the application with option for the database : "	
+	echo -e "\t\t - install: install database from scratch (drop everything first)"	
+	echo -e "\t\t - update: update the database"	
+	echo -e "\t\t - none: do not update the database"	
+	echo -e "\t-u reinstall|update|none: Update a version of the application with option for the database : "	
 	echo -e "\t-v <svn_version> : Set svn tag/version"	
 	echo -e "\t-w : Generate and watch assets"
 	echo -e "\t-y : Update database"
@@ -222,16 +226,26 @@ getcode ()
             ;;
     esac
 }
-
+# those 2 functions should be merged
 install_application ()
 {
-	
+	action=${1:-"update"}
 	if  $(confirm "Install $application_projectname into $install_path") ; then
 		check_needed_tools
 		check_needed_apps
 		getcode "create"
 		manage_composer "update"
-		install_database
+		case "$UPDATEDB" in
+			"install")
+				install_database
+			;;  
+			"update")
+				update_database
+			;;
+			"none")
+				#doing nothing
+			;;
+		esac
 		install_assets
 		clear_cache
 	fi
@@ -356,7 +370,7 @@ setup_conf()
 }
 
 # hce:awusitp:k
-while getopts ":abcde:fhikl:p:r:stuv:wyz" optname
+while getopts ":abcde:fhikl:p:r:stu:v:wyz" optname
   do
     case "$optname" in
       "f")
@@ -392,6 +406,7 @@ while getopts ":abcde:fhikl:p:r:stuv:wyz" optname
         ;;
       "u")
         MYACTIONS=("${MYACTIONS[@]}" "update_application")
+        UPDATEDB=${OPTARG}
        ;;
 	  "y")
         MYACTIONS=("${MYACTIONS[@]}" "update_database")
