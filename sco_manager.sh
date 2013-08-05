@@ -200,7 +200,7 @@ getcode ()
             case $application_scmtool in
 				"git")
 					cecho "Cloning git repository"
-					git clone $application_scmurl $application_scmversion .
+					git clone $application_scmurl .
 				;; 
 				"svn")
 					cecho "Checkout svn repository"
