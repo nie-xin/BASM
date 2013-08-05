@@ -441,7 +441,6 @@ while getopts ":abcde:fhikl:p:r:stu:v:wyz" optname
 			cd $sm_dir
 			git pull
 		  ) 
-		  exit 0;
         ;;         
       *)
         cecho -e "\n\t-> $OPTARG Bad options\n\n" $red
