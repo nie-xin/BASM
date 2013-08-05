@@ -64,7 +64,7 @@ Best Practice
 This simple manager gives you the ability to never lose anymore time with annoying symony commands, as it takes care of rights ;)
 A good way of using it for several projects might be to define several alias, with different config file and store them in a common directory (for example /home/user/work/config-tools/sm-config). 
 
-With bash, you could add something like that in the ~/.bash_aliases file to parse that directory and add alias for your projects automatically
+With bash, you could add something like that in the ~/.bash_aliases file to parse that directory and add alias for your projects automatically for both the symony manager (starting with sm_ and the <project_name>) and a shortcut to the home of the project (starting by po_ and the <project_name>)
 
 	# sm conf alias loader
 	sco_manager_path=/home/user/work/projects/mygithub/BASM/sco_manager.sh
@@ -73,7 +73,10 @@ With bash, you could add something like that in the ~/.bash_aliases file to pars
 	alias sm_='$sco_manager_path'
 	for conffile in `ls $sco_manager_conf_directory`; do
 		project_name=${conffile/sm-config-}
-		alias sm_$project_name="$sco_manager_path -l $sco_manager_conf_directory/$conffile"
+		project_name=${conffile/sm-config-} 
+		alias sm_$project_name="${sco_manager_path} -l $sco_manager_conf_directory/${conffile}"
+		project_path=`cat $sco_manager_conf_directory/$conffile | grep application_install_path | sed 's/application_install_path="//g' | sed 's/"//g'`
+		alias po_$project_name="cd $project_path"
 	done
 	
 I tend to prefix my configuraiton files with sm-config-<project_name>, but this is not mandatory, and the alias shortcut will be sm_<project_name> <OPTIONS>
