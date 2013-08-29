@@ -32,6 +32,7 @@ default_install_env="prod"
 default_deployment_user="www-data"
 default_install_user=$USER
 default_bundles=""
+default_behat=""
 
 black='\E[30;47m'
 red='\E[31;47m'
@@ -89,12 +90,13 @@ help()
 	echo -e "\t-c : Clear and setup cache"
 	echo -e "\t-e <environment_name> : Set symfony environment"
 	echo -e "\t-f : Do not ask question mo'fo'"	
-	echo -e "\t-i : Install a version of the application"
+	echo -e "\t-g : Launch Behat tests"	
+	echo -e "\t-i : Install a version of the application"	
 	echo -e "\t-k : Check tools and/or install them"
 	echo -e "\t-l <sm_config_file> : Load config from a spcific file"	
 	echo -e "\t-p <installation_path> : Set an installation path"
 	echo -e "\t-s : Drop and ReInstall Database"	
-	echo -e "\t-t : Launch tests"
+	echo -e "\t-t : Launch Phpunit tests"
 	echo -e "\t-u <install|update|none>: Update a version of the application with option for the database : "	
 	echo -e "\t\t - install: install database from scratch (drop everything first)"	
 	echo -e "\t\t - update: update the database"	
@@ -286,8 +288,19 @@ launch_test()
 	install_phpunit
 	cecho "Launching Test" $red
 	phpunit -c app/
-	
 }
+launch_behat_test()
+{
+	if [ ${#application_behat[*]} -gt 0 ]; then
+		cecho "Launching Behat Testing" $red
+		for bundle in "${application_behat[@]}"
+		do
+			cecho "Behat Testing of bundle $bundle" $red
+			php bin/behat @${bundle}
+		done
+    fi
+}
+
 
 install_composer()
 {
@@ -318,8 +331,8 @@ setup_conf()
 	application_scmtool=${application_scmtool:-$default_scmtool}
 	[ "$application_scmtool" == "git" -o "$application_scmtool" == "svn" ] || (cecho "SCM tool not supported : $application_scmtool" $red && exit 0)
 	
-
 	application_bundles=${application_bundles:-$default_bundles}
+	application_behat=${application_behat:-$default_behat}
 
 	# Setup install_path
 	if [ ! -z "$MYVERSION" ]; then
@@ -370,7 +383,7 @@ setup_conf()
 }
 
 # hce:awusitp:k
-while getopts ":abcde:fhikl:p:r:stu:v:wyz" optname
+while getopts ":abcde:fghikl:p:r:stu:v:wyz" optname
   do
     case "$optname" in
       "f")
@@ -401,6 +414,9 @@ while getopts ":abcde:fhikl:p:r:stu:v:wyz" optname
       "c")
         MYACTIONS=("${MYACTIONS[@]}" "clear_cache")
         ;;
+      "g")
+        MYACTIONS=("${MYACTIONS[@]}" "launch_behat_test")
+       ;;
       "i")
         MYACTIONS=("${MYACTIONS[@]}" "install_application")
         ;;
@@ -461,6 +477,7 @@ if [ ! -z $MYACTIONS ]; then
             $action
     done
     set_working_rights $depl_user
+
 else 
     cecho "Nothing to do, try help (-h)\n" 
 fi

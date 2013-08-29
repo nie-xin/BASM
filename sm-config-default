@@ -25,3 +25,6 @@ application_deployment_user="www-data"
 
 # application_bundles : List of bundles of the application
 application_bundles=( "JMeyo/CoreBundle" )
+
+# application_bundles : List of bundles which contains Behat test we want to test for the application
+application_behat=( "JMeyo/CoreBundle" )
