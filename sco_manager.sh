@@ -67,7 +67,7 @@ cecho ()
 }
 
 confirm () {
-	if $FORCE; then true;return;fi;
+	if $FORCE; then echo "1";fi;
     q=$(cecho "${1:-Doing some stuff} \n-> Are you sure? [Y/n]")
     read -r -p "$q" response
     case $response in
@@ -371,7 +371,7 @@ setup_conf()
 
 
 	if [ ! -d "$install_path" ]; then
-		if [ $(confirm "Work on $application_projectname (path: $install_path )")== 1 ]; then
+		if [ $(confirm "Work on $application_projectname (path: $install_path )") == 1 ]; then
 		#if [ confirm "Working with $application_projectname into $install_path\n" ]; then
 			mkdir -p $install_path
 		else
