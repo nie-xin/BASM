@@ -67,7 +67,7 @@ cecho ()
 }
 
 confirm () {
-	if $FORCE; then echo "1";fi;
+	if $FORCE; then echo "1";return;fi;
     q=$(cecho "${1:-Doing some stuff} \n-> Are you sure? [Y/n]")
     read -r -p "$q" response
     case $response in
