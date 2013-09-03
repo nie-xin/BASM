@@ -72,11 +72,10 @@ confirm () {
     read -r -p "$q" response
     case $response in
         [yY][eE][sS]|[yY]) 
-            true
+            echo "1"
             ;;
         *)
-            false
-            exit 0
+            echo "0"
             ;;
     esac
 }
@@ -174,23 +173,28 @@ manage_database()
 	fi
 	
 	php app/console doctrine:schema:update --env="$install_env" --force
-	if  $(confirm "Do you want to generate acl tables") ; then
+	if  [ $(confirm "Do you want to generate acl tables") == 1 ]; then
 		# hack to ignore error for already existing acl tables
 		php app/console init:acl --env="$install_env" || true
 		
 	fi
 	
-	#add intial fixtures
-	${FORCE} && opt="-n"
-	php app/console doctrine:fixtures:load --env="$install_env" $opt
+	#add initial fixtures from all vendor packages
+	if  [ $(confirm "Do you want to load all fixtures from vendor packages") == 1 ] ; then
+		${FORCE} && opt="-n"
+		php app/console doctrine:fixtures:load --env="$install_env" $opt
+	fi
 	#add environment specific fixtures
 	for bundle in "${application_bundles[@]}"
     do
-		if [ ! -z `ls ./src/$bundle/DataFixtures/$install_typenv 2>/dev/null` ]; then
-			php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$install_typenv
-		else
-			cecho "No fixtures in ./src/$bundle/DataFixtures/$install_typenv" $blue
-		fi
+		for fixture_env in $install_typenv "ORM";do
+			if [ -d ./src/$bundle/DataFixtures/$fixture_env ]; then
+				php app/console doctrine:fixtures:load --append --env="$install_env" --fixtures=./src/$bundle/DataFixtures/$fixture_env
+			else
+				cecho "No fixtures in ./src/$bundle/DataFixtures/$fixture_env" $blue
+			fi
+		done
+
     done
 }
 
@@ -232,7 +236,7 @@ getcode ()
 install_application ()
 {
 	action=${1:-"update"}
-	if  $(confirm "Install $application_projectname into $install_path") ; then
+	if  [ $(confirm "Install $application_projectname into $install_path") == 1 ]; then
 		check_needed_tools
 		check_needed_apps
 		getcode "create"
@@ -254,7 +258,7 @@ install_application ()
 }
 update_application ()
 {
-	if  $(confirm "Update $application_projectname into $install_path") ; then
+	if  [ $(confirm "Update $application_projectname into $install_path") == 1 ]; then
 		check_needed_tools
 		cecho "Checkout code"
 		getcode "update"
@@ -367,7 +371,7 @@ setup_conf()
 
 
 	if [ ! -d "$install_path" ]; then
-		if $(confirm "Work on $application_projectname (path: $install_path )"); then
+		if [ $(confirm "Work on $application_projectname (path: $install_path )")== 1 ]; then
 		#if [ confirm "Working with $application_projectname into $install_path\n" ]; then
 			mkdir -p $install_path
 		else
