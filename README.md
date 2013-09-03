@@ -67,7 +67,7 @@ A good way of using it for several projects might be to define several alias, wi
 With bash, you could add something like that in the ~/.bash_aliases file to parse that directory and add alias for your projects automatically for both the symony manager (starting with sm_ and the <project_name>) and a shortcut to the home of the project (starting by po_ and the <project_name>)
 
 	# sm conf alias loader
-	sco_manager_path=/home/user/work/projects/mygithub/BASM/sco_manager.sh
+	sco_manager_path=/home/user/work/tools/BASM/sco_manager.sh
 	sco_manager_conf_directory=/home/user/work/config-tools/sm-config-default
 	# default shortcut for the calling symfony manager without any conf files
 	alias sm_='$sco_manager_path'
