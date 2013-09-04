@@ -370,6 +370,7 @@ setup_conf()
 	cecho "\t - SCM Application version : $application_scmversion" $blue 
 
 
+	[ -z "$install_path" ] && cecho "Stop - Configuration seems to be absent" $red && exit 0
 	if [ ! -d "$install_path" ]; then
 		if [ $(confirm "Work on $application_projectname (path: $install_path )") == 1 ]; then
 		#if [ confirm "Working with $application_projectname into $install_path\n" ]; then
