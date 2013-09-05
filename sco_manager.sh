@@ -349,7 +349,7 @@ setup_conf()
 	if [ ! -z "$MYPATH" ]; then
 		install_path=$MYPATH
 	else 
-		install_path=${install_path:-$application_install_path}
+		install_path=${install_path:-$default_install_path}
 	fi
 	
 	# Setup install_env
